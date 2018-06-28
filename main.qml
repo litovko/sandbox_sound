@@ -26,21 +26,6 @@ Window {
         antialiasing: true
 
 
-        Rectangle {
-            id: marker
-            height: ma.height
-            width: x-ma.mouseX
-            color: "transparent"
-            radius: 1
-            border.color: "gray"
-        }
-//        MouseArea {
-//            id: ma
-//            //preventStealing: true
-//            propagateComposedEvents: true
-//            anchors.fill: parent
-//            onPressed: console.log("onPressed: " + ma.mouseX + ", " + ma.mouseY);
-//        }
 
         LineSeries {
             id: source

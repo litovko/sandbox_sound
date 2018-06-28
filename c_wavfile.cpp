@@ -36,9 +36,8 @@ void c_wavfile::load_file(const QString& filename)
         qDebug()<<"wav_len:"<<wav_length;
         // load data to class member
         int screen_res=wav_length*8/SDL_AUDIO_BITSIZE(wav_spec.format)/2048/8;
+        //int screen_res=10;
         qDebug()<<"resolution"<<screen_res;
-        int p=0;
-
 
         for (Uint32 i=0;  i<wav_length; i+=screen_res*2) {
             int16_t s=0;

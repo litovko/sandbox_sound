@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 //#include <SDL.h>
 #include <c_wavfile.h>
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);

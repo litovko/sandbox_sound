@@ -7,6 +7,8 @@
 #include <QtCharts>
 #include <QtCharts/QChartView>
 
+#include "fasttransforms.h"
+
 using namespace QtCharts;
 
 class c_wavfile : public QObject

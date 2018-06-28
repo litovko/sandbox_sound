@@ -26,6 +26,7 @@ QML_DESIGNER_IMPORT_PATH =
 #LIBS += -lSDL2
 #LIBS+= -L$$PWD//SDL2//lib
 INCLUDEPATH += $$PWD/SDL2/include
+INCLUDEPATH += $$PWD/alglib/src
 win32: LIBS += -L$$PWD//SDL2//lib -lSDL2
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
