@@ -1,0 +1,46 @@
+import QtQuick 2.11
+import QtQuick.Window 2.11
+import litovko 1.0
+import QtQuick.Dialogs 1.2
+import QtCharts 2.2
+
+Window {
+    visible: true
+    width: 640
+    height: 480
+    title: qsTr("Hello World")
+    color: "transparent"
+
+    Rectangle {
+        anchors.fill: parent
+        color: "black"
+        opacity: 0.5
+        border.color: "yellow"
+        border.width: 3
+        radius: 5
+    }
+    ChartView {
+        id: cv
+        title: "Line"
+        anchors.fill: parent
+        antialiasing: true
+
+        LineSeries {
+            id: source
+            name: "LineSeries"
+            XYPoint { x: 0; y: 0 }
+            XYPoint { x: 1.1; y: -1 }
+
+            XYPoint { x: 7; y: 1 }
+        }
+    }
+    WavFile{
+        id: f
+        source:  source
+        Component.onCompleted:  f.load_file("d:/morse2.wav")
+    }
+//    FileDialog {
+
+//    }
+
+}
