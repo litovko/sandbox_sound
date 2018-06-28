@@ -1,4 +1,4 @@
-QT += core  quick charts
+QT += core quick charts
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use

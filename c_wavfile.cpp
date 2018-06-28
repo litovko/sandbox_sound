@@ -35,15 +35,19 @@ void c_wavfile::load_file(const QString& filename)
         qDebug()<<"size:   "<<wav_spec.size;
         qDebug()<<"wav_len:"<<wav_length;
         // load data to class member
+        int screen_res=wav_length*8/SDL_AUDIO_BITSIZE(wav_spec.format)/2048/8;
+        qDebug()<<"resolution"<<screen_res;
         int p=0;
 
-        for (Uint32 i=0;  i<wav_length/8; i+=2) {
+
+        for (Uint32 i=0;  i<wav_length; i+=screen_res*2) {
             int16_t s=0;
             s+=(wav_buffer[i+1]<<8)|wav_buffer[i];
             //if (s>0) qDebug()<<wav_buffer[i+1]<<":"<<wav_buffer[i]<<"="<<s;
-            m_points.append(QPointF(p++*1.0/wav_spec.freq,(s*1.0)/32764.0));
+            m_xmax=i/2.0/wav_spec.freq;
+            m_points.append(QPointF(m_xmax,(s*1.0)/32764.0));
         }
-        m_xmax=(p-1)*1.0/wav_spec.freq;
+
         qDebug()<<"maxtime:"<<m_xmax;
         m_source->replace(m_points);
         m_source->attachedAxes()[0]->setMax(m_xmax);
