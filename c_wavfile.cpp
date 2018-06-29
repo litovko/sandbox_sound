@@ -1,5 +1,6 @@
 #include "c_wavfile.h"
 #include <QDebug>
+#include "fasttransforms.h"
 
 
 c_wavfile::c_wavfile(QObject *parent) : QObject(parent)
@@ -52,6 +53,29 @@ void c_wavfile::load_file(const QString& filename)
         m_source->attachedAxes()[0]->setMax(m_xmax);
         //qDebug()<<m_points;
         SDL_FreeWAV(wav_buffer);
+
+        using namespace alglib;
+            //
+            // first we demonstrate forward FFT:
+            // [1,1,1,1] is converted to [4, 0, 0, 0]
+            //
+            real_1d_array x = "[1,1,1,1]";
+            complex_1d_array f;
+            real_1d_array x2;
+            fftr1d(x, f);
+            printf("%s\n", f.tostring(3).c_str()); // EXPECTED: [4,0,0,0]
+
+            //
+            // now we convert [4, 0, 0, 0] back to [1,1,1,1]
+            // with backward FFT
+            //
+            fftr1dinv(f, x2);
+            printf("%s\n", x2.tostring(3).c_str()); // EXPECTED: [1,1,1,1]
+
+
+
+
+
     }
 
 }
