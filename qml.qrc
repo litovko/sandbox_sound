@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+	<file>PlotChart.qml</file>
+	<file>theme/theme.js</file>
     </qresource>
 </RCC>

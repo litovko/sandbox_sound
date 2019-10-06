@@ -1,14 +1,13 @@
-import QtQuick 2.9
-import QtQuick.Window 2.3
-import litovko 1.0
-import QtQuick.Dialogs 1.2
-import QtQuick.Controls 2.2
-import QtCharts 2.2
 
-Window {
+import QtQuick 2.12
+import litovko 1.0
+import QtQuick.Controls 2.12
+//import QtCharts 2.2
+
+ApplicationWindow {
     visible: true
-    width: 1000
-    height: 800
+    width: 1500
+    height: 900
     title: qsTr("Hello World")
     color: "transparent"
 
@@ -17,23 +16,37 @@ Window {
         color: "black"
         opacity: 1
         border.color: "yellow"
-        border.width: 3
+        border.width: 1
         radius: 5
+        focus: true
+        Keys.onPressed: {
+            print("key " + event.key)
+            if (event.key === Qt.Key_F2) {
+
+                f.load_file("d:/morse2.wav")
+            }
+        }
         Rectangle{
             id: p
-            width: 500;
+            width: 600;
             height: 100;
             color: "#000000"
             radius: 3
-            border.width: 4
-            border.color: "#515224"
+            border.width: 1
+            border.color: "yellow"
+            anchors {
+                horizontalCenter: parent.horizontalCenter
+                top: parent.top
+                margins: 5
+            }
+
             TextField {
                 id: tf
                 height: 30
                 anchors.leftMargin: 300
                 anchors.topMargin: 8
                 anchors {top:parent.top; left: parent.left;margins: 10}
-                text: f.frame_start.toFixed(1)
+                text: f.frame_start.toFixed(2)
             }
 
             Button {
@@ -58,7 +71,7 @@ Window {
                 anchors.left: parent.left
                 anchors.margins: 10
                 anchors.topMargin: 35
-                text: f.frame_width.toFixed(1)
+                text: f.frame_width.toFixed(2)
             }
 
             TextField {
@@ -66,7 +79,7 @@ Window {
                 x: 0
                 y: -1
                 height: 30
-                text: "0.1"
+                text: "0.01"
                 anchors.left: parent.left
                 anchors.topMargin: 62
                 anchors.leftMargin: 300
@@ -105,68 +118,44 @@ Window {
 
         }
     }
-    ChartView {
-        id: cv
-        title: "Line"
-        anchors.top: parent.top
-        anchors.topMargin: p.height
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 300
-        width: 900
-        antialiasing: true
-
-        LineSeries {
-            id: src
-            name: "LineSeries"
-            color: "black"
-            XYPoint { x: 0; y: 0 }
-            XYPoint { x: 1.1; y: -1 }
-
-            XYPoint { x: 7; y: 1 }
-            onClicked: console.log("onClicked: " + point.x + ", " + point.y);
-
-                onPressed: {
-                  console.log(" mx:"+point.x+", "+ point.x)
-                  console.log(cv.mapToPosition(point));
-
-
-                          }
-                onReleased: {
-
-                  console.log(" released:"+point.x)
-
-                          }
-
+    Rectangle {
+        id: plot_area
+        border.width: 1
+        border.color: "yellow"
+        radius: 5
+        color: "transparent"
+        height: 650
+        anchors {
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                    margins: 50
+        }
+        PlotChart {
+            id: plotc
+            height: parent.height/2-2*anchors.margins
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+                margins: 5
+            }
+        }
+        PlotChart {
+            id: plotf
+            height: parent.height/2-2*anchors.margins
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+                margins: 5
+            }
         }
     }
-    ChartView {
-        id: cvres
-        title: "Line"
-        anchors.bottom: parent.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        height: 300
-        width: 900
-        antialiasing: true
 
-        LineSeries {
-            id: res
-            name: "Результаты"
-            color: "black"
-            XYPoint { x: 0; y: 0 }
-            XYPoint { x: 1.1; y: 20 }
-
-            XYPoint { x: 48000; y: 1 }
-
-        }
-    }
     WavFile{
         id: f
-        source:  src
-        result: res
-        Component.onCompleted:  f.load_file("d:/morse2.wav")
+        chart: plotc.plot
+        chartf: plotf.plot
     }
-//    FileDialog {
-
-//    }
-
 }

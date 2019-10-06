@@ -1,4 +1,4 @@
-QT += core quick charts
+QT += core quick printsupport
 CONFIG += c++11
 
 #QMAKE_CXXFLAGS += -std=c++11
@@ -20,7 +20,9 @@ SOURCES += \
     alglib/src/ap.cpp \
     alglib/src/alglibmisc.cpp \
     alglib/src/fasttransforms.cpp \
-    alglib/src/alglibinternal.cpp
+    alglib/src/alglibinternal.cpp \
+    third/qcustomplot/qcustomplot.cpp \
+    third/qmlplot.cpp
     alglib/src/fasttransforms.cpp
 
 RESOURCES += qml.qrc
@@ -34,7 +36,9 @@ QML_DESIGNER_IMPORT_PATH =
 #LIBS+= -L$$PWD//SDL2//lib
 INCLUDEPATH += $$PWD/SDL2/include
 INCLUDEPATH += $$PWD/alglib/src
-win32: LIBS += -L$$PWD//SDL2//lib -lSDL2
+INCLUDEPATH += $$PWD/third
+INCLUDEPATH += $$PWD/third/qcustomplot
+LIBS += -L$$PWD//SDL2/lib/x64 -lSDL2
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
@@ -42,5 +46,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 message(LIBS: $$LIBS)
 
 HEADERS += \
-    c_wavfile.h
+    c_wavfile.h \
+    third/qcustomplot/qcustomplot.h \
+    third/qmlplot.h
+
+DISTFILES += \
+    PlotChart.qml \
+    theme/theme.js
 

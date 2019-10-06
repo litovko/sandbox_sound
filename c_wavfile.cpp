@@ -1,7 +1,7 @@
 #include "c_wavfile.h"
 #include <QDebug>
 #include "fasttransforms.h"
-
+#include "qcustomplot.h"
 #include <QtMath>
 c_wavfile::c_wavfile(QObject *parent) : QObject(parent)
 {
@@ -10,10 +10,10 @@ c_wavfile::c_wavfile(QObject *parent) : QObject(parent)
 
 void c_wavfile::load_file(const QString& filename)
 {
+    if (m_chart->CustomPlot()==nullptr) return;
     SDL_AudioSpec wav_spec;
     Uint32 wav_length; // in bytes
     //Uint8 *wav_buffer;
-
 
 
     /* Load the WAV */
@@ -38,7 +38,8 @@ void c_wavfile::load_file(const QString& filename)
         m_sample_rate=wav_spec.freq;
         emit sample_rateChanged();
         // load data to class member
-        int screen_res=wav_length*8/SDL_AUDIO_BITSIZE(wav_spec.format)/2048/8;
+        //int screen_res=wav_length*8/SDL_AUDIO_BITSIZE(wav_spec.format)/2048/8;
+        int screen_res=1;
         //int screen_res=10;
         qDebug()<<"resolution"<<screen_res;
         //wav_length=100000;
@@ -52,11 +53,40 @@ void c_wavfile::load_file(const QString& filename)
         }
 
         qDebug()<<"maxtime:"<<m_xmax;
-        m_source->replace(m_points);
-        m_source->attachedAxes()[0]->setMax(m_xmax);
+//        m_source->replace(m_points);
+//        m_source->attachedAxes()[0]->setMax(m_xmax);
         //qDebug()<<m_points;
         //SDL_FreeWAV(wav_buffer);
+        qDebug()<<"1:";
+        if (m_chart==nullptr) qDebug()<<"INIT!!!";
+        qDebug()<<m_chart->CustomPlot();
+        m_chart->CustomPlot()->clearGraphs();
+        qDebug()<<"2:";
+        m_chart->CustomPlot()->addGraph()->setName("wav");
+        qDebug()<<"3:";
+        m_chart->CustomPlot()->graph(0)->setPen( QPen( QColor(255,255,0,255) ) );
+        m_chart->CustomPlot()->graph(0)->setVisible(true);
+        m_chart->CustomPlot()->addGraph()->setName("fft");
+        m_chart->CustomPlot()->graph(1)->setPen( QPen( QColor(0,255,0,255) ) );
+        m_chart->CustomPlot()->graph(1)->setVisible(true);
+        //m_chart->CustomPlot()->graph(0)->setSelectable(QCP::stWhole);
+        //m_chart->CustomPlot()->graph(0)->selectionDecorator()->setBrush(QColor(255,255,255,20));
+        m_chart->CustomPlot()->xAxis->setLabel( "Время, сек" );
+        //m_chart->CustomPlot()->plotLayout()->set
+        //m_chart->CustomPlot()->xAxis->setRange( 0, 500 );
+        m_chart->CustomPlot()->yAxis->setRange( -0.5, 0.5 );
+        qDebug()<<"4:";
+        for (auto el: m_points) {
+            m_chart->CustomPlot()->graph(0)->addData(el.x(), el.y());
+            //qDebug()<<"x:"<<el.x()<<" y:"<<el.y();
+        }
+        qDebug()<<"5:";
+        m_chart->CustomPlot()->xAxis->setRange( 0, m_xmax);
 
+//        m_chart->CustomPlot()->yAxis->setRange( ymin, ymax*2 );
+        qDebug()<<"6:";
+        draw_frame();
+        m_chart->CustomPlot()->replot();
 
 
 
@@ -85,31 +115,76 @@ void c_wavfile::fft()
             //qDebug()<<p<<" "<<m_points2.last();
             p++;
         }
-        m_source->replace(m_points2);
         qDebug()<<m_xmax;
-        m_source->attachedAxes()[0]->setMax(m_frame_start+m_frame_width);
-        m_source->attachedAxes()[0]->setMin(m_frame_start);
         qDebug()<<"m_xmax:"<<m_xmax;
         complex_1d_array f;
         real_1d_array x2;
         fftr1d(x, f);
         qreal maxy=0;
         m_res_points.clear();
+        m_chartf->CustomPlot()->clearGraphs();
+        m_chartf->CustomPlot()->addGraph()->setName("fft");
+        qDebug()<<"fft length:"<<f.length();
         for (auto i=0; i<f.length(); i++) {
-
-
             m_res_points.append(QPointF( i * 48000/f.length() , qSqrt( f[i].x*f[i].x+f[i].y*f[i].y )));
+            m_chartf->CustomPlot()->graph(0)->addData(m_res_points[i].x(), m_res_points[i].y());
             maxy=qMax(maxy,m_res_points[i].y());
-            //qDebug()<<p<<" "<<m_res_points.last();
         }
-        qDebug()<<"line ser"<<m_result->count()<<"res points:"<<m_res_points.length();
-        m_result->replace(m_res_points);
-        qDebug()<<"replace points";
-        //m_result->attachedAxes()[0]->setMax(3000);
+
+//        for (auto el: m_res_points) {
+//            m_chartf->CustomPlot()->graph(0)->addData(el.x(), el.y());
+//            //qDebug()<<"x:"<<el.x()<<" y:"<<el.y();
+//        }
         qDebug()<<"maxy:"<<maxy;
-        m_result->attachedAxes()[1]->setMax(maxy);
-        m_result->attachedAxes()[1]->setMin(0);
         qDebug()<<"3";
+        m_chartf->CustomPlot()->graph(0)->setPen( QPen( QColor(255,255,100,255) ) );
+        m_chartf->CustomPlot()->graph(0)->setVisible(true);
+        m_chartf->CustomPlot()->xAxis->setRange( 300, 2000);
+        m_chartf->CustomPlot()->yAxis->setRange( 0, 200);
+        draw_frame();
+        m_chartf->CustomPlot()->replot();
+        m_chart->CustomPlot()->replot();
+}
+
+void c_wavfile::draw_frame()
+{
+    if (rect==nullptr)
+        rect= new QCPItemRect(m_chart->CustomPlot());
+    rect->setPen(QColor(255,255,255,255));
+    rect->topLeft->setCoords(m_frame_start,0.5);
+    rect->bottomRight->setCoords(m_frame_start+m_frame_width,-0.5);
+    rect->setVisible(true);
+}
+
+void c_wavfile::calc_feature1()
+{
+    //для начала определим какая у нас частота сигнала, возьмем отрезок 2 секунды и найдем частоту у которой максимальный уровень на этом отрезке.
+
+    //Надо пробежаться по всему буферу фреймом и определить в каждом фрейме уровень частоты 800 гц.
+
+    qint32 num=2*m_sample_rate; //количество сэмплов во фрейме
+    qint32 ind=0*m_sample_rate; //стартовая точка в массиве сэмплов
+    for (auto i=0; i<100; i++)
+}
+
+CustomPlotItem *c_wavfile::chartf() const
+{
+    return m_chartf;
+}
+
+void c_wavfile::setChartf(CustomPlotItem *chartf)
+{
+    m_chartf = chartf;
+}
+
+CustomPlotItem *c_wavfile::chart() const
+{
+    return m_chart;
+}
+
+void c_wavfile::setChart(CustomPlotItem *chart)
+{
+    m_chart = chart;
 }
 
 int c_wavfile::sample_rate() const
@@ -141,25 +216,9 @@ void c_wavfile::setFrame_width(const qreal &frame_width)
     m_frame_width = frame_width;
 }
 
-QLineSeries *c_wavfile::result() const
-{
-    return m_result;
-}
 
-void c_wavfile::setResult(QLineSeries *result)
-{
-    m_result = result;
-}
 
-QLineSeries *c_wavfile::source() const
-{
-    return m_source;
-}
 
-void c_wavfile::setSource(QLineSeries *source)
-{
-    m_source = source;
-}
 
 
 
